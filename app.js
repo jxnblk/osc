@@ -72,7 +72,7 @@ app.factory('svg', function() {
 });
 
 app.controller('MainCtrl', ['$scope', '$http', '$location', 'webaudio', 'svg', function($scope, $http, $location, webaudio, svg) {
-  $scope.title = 'OSC NG';
+  $scope.title = 'OSC';
   $scope.peaks = null;
   if (!$location.search().buffer) {
     $scope.bufferLength = 256;
