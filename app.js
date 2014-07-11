@@ -73,12 +73,17 @@ app.factory('svg', function() {
 
 app.controller('MainCtrl', ['$scope', '$http', '$location', 'webaudio', 'svg', function($scope, $http, $location, webaudio, svg) {
   $scope.title = 'OSC NG';
-  $scope.peaks = 'loading';
+  $scope.peaks = null;
+  if (!$location.search().buffer) {
+    $scope.bufferLength = 256;
+  } else {
+    $scope.bufferLength = parseInt($location.search().buffer, 10);
+  };
   $scope.load = function() {
-    $location.search({ file: $scope.fileUrl });
+    $location.search({ file: $scope.fileUrl, buffer: $scope.bufferLength });
     $http.get($scope.fileUrl, { responseType: 'arraybuffer' }).success(function(response) {
       webaudio.buffer(response, function(buffer) {
-        webaudio.peaks(buffer, 256, function(data) {
+        webaudio.peaks(buffer, $scope.bufferLength, function(data) {
           $scope.peaks = data;
           svg.waveform(data, function(d) {
             $scope.d = d;
@@ -96,43 +101,32 @@ app.controller('MainCtrl', ['$scope', '$http', '$location', 'webaudio', 'svg', f
 
 
 app.directive('waveform', function() {
-  //var iconUrl = 'icons/plangular-icons.svg',
   return {
     restrict: 'A',
     scope: true,
     link: function (scope, elem, attrs) {
       var svg = d3.select(elem[0]);
-
-      var x = d3.scale.linear()
-    
-          .range([0, 1024]);
-      var y = d3.scale.linear()
-          .range([256, 0]);
+      var x = d3.scale.linear().range([0, 1024]);
+      var y = d3.scale.linear().range([256, 0]);
       var line = d3.svg.line()
           .x(function(d, i) { return x(i) })
           .y(function(d) { return y(d) });
-
+      var area = d3.svg.area()
+          .x(function(d, i) { return x(i) })
+          .y0(256) 
+          .y1(function(d) { return y(d) });
 
       scope.$watch('peaks', function() {
-        console.log('waveform directive');
         if (!scope.peaks) return false;
-        console.log(scope.peaks);
-        // add domains
+        console.log('waveform directive');
         x.domain([0, scope.peaks.length]);
         y.domain([0,1]);
         console.log(line);
         svg.append('path')
-          .attr('d', line(scope.peaks));
-        //svg.append('path')
-        //  .datum(scope.peaks)
-        //  .attr('d', line);
+          //.attr('d', line(scope.peaks));
+          .attr('d', area(scope.peaks));
       });
 
-      //svg = sprite.getElementById(id).cloneNode(true);
-      //el.className += ' plangular-icon plangular-icon-' + id;
-      //svg.removeAttribute('id');
-      //svg.setAttribute('class', el.className);
-      //el.parentNode.replaceChild(svg, el);
     }
   }
 });

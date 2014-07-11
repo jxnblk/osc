@@ -8,7 +8,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/css/basscss.css">
   <style>
-    svg { max-height: 100%; }
+    svg {
+      max-height: 100%;
+      fill: #0cf;
+    }
   </style>
 </head>
 <body ng-controller="MainCtrl">
@@ -18,9 +21,11 @@
   </header>
 
   <section>
-    <form ng-submit="load()">
+    <form ng-submit="load()" class="form form-stacked">
       <label>Sound File URL</label>
       <input type="text" ng-model="fileUrl">
+      <label>Buffer Length</label>
+      <input type="number" ng-model="bufferLength">
       <input type="submit" value="Load">
     </form>
   </section>
@@ -34,7 +39,7 @@
   <section>
     <h1>Waveform Directive</h1>
     <div>
-      <svg viewBox="0 0 1024 256">
+      <svg ng-if="d" viewBox="0 0 1024 256">
         <path ng-attr-d="{{ d }}"/>
       </svg>
     </div>
